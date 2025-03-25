@@ -1,3 +1,5 @@
+import Chart from 'chart.js/auto';
+
 <html>
 <body>
     <!-- membuat elemen canvas untuk menempatkan grafik -->
