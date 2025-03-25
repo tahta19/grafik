@@ -1,80 +1,63 @@
 <body>
-    <div class="container mt-5">
-        <h1>Membuat Grafik dengan PHP dan MySQL</h1>
-        <div class="chart-container" style="position: relative; height: 40vh; width: 80vw;">
+    <div class="container pt-5">
+        <h1>Menampilkan Grafik dengan PHP dan MySQLI</h1>
+        <div class="chart-container" style="position: relative; height:40vh; width:80vw">
             <canvas id="myChart"></canvas>
         </div>
+        <button id="downloadPdf">Download PDF</button>
     </div>
-
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-    <script>
-        <?php
-        include "koneksi.php";
-
-        $sql = "SELECT jurusan, COUNT(*) AS jml_mahasiswa FROM mahasiswa GROUP BY jurusan";
-        $result = mysqli_query($conn, $sql);
-
-        if (!$result) {
-            die("Query gagal: " . mysqli_error($conn));
-        }
-
-        while ($data = mysqli_fetch_assoc($result)) {
-            echo "Jurusan: " . $data['jurusan'] . " - Jumlah: " . $data['jml_mahasiswa'] . "<br>";
-        }
-        ?>
-
-        $jurusan = [];
-        $jumlah = [];
-
-        while ($data = mysqli_fetch_array($result)) {
-            $jurusan[] = $data['jurusan'];
-            $jumlah[] = $data['jml_mahasiswa'];
-        }
-        ?>
-
-        // Cek apakah PHP sudah membaca data dengan benar
-echo "<pre>";
-print_r($jurusan);
-print_r($jumlah);
-echo "</pre>";
-?>
-
-        const ctx = document.getElementById("myChart");
-        const myChart = new Chart(ctx, {
-            type: "bar",
-            data: {
-                labels: <?php echo json_encode($jurusan); ?>,
-                datasets: [
-                    {
-                        label: "Jumlah Mahasiswa",
-                        data: <?php echo json_encode($jumlah); ?>,
-                        backgroundColor: [
-                            "rgba(75, 192, 192, 0.2)",
-                            "rgba(255, 99, 132, 0.2)",
-                            "rgba(54, 162, 235, 0.2)",
-                            "rgba(255, 206, 86, 0.2)",
-                        ],
-                        borderColor: [
-                            "rgba(75, 192, 192, 1)",
-                            "rgba(255, 99, 132, 1)",
-                            "rgba(54, 162, 235, 1)",
-                            "rgba(255, 206, 86, 1)",
-                        ],
-                        borderWidth: 1,
-                    },
-                ],
-            },
-            options: {
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        ticks: {
-                            stepSize: 1,
-                        },
-                    },
-                },
-            },
-        });
-    </script>
 </body>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
+
+
+<?php
+include 'koneksi.php';
+$query = "SELECT jurusan, COUNT(*) AS jml_mahasiswa FROM mahasiswa GROUP BY jurusan;";
+$result = mysqli_query($koneksi, $query);
+while ($data = mysqli_fetch_array($result)) {
+    $jurusan[] = $data['jurusan'];
+    $jumlah[] = $data['jml_mahasiswa'];
+}
+?>
+   <script>
+    const ctx = document.getElementById('myChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: ["bisnis digital", "informatika", "sistem informasi", "teknik industri"],
+            datasets: [{
+                label: 'Jumlah Mahasiswa',
+                data: [2, 1, 4, 2],
+                backgroundColor: [
+                    'rgba(255, 99, 71, 1)',
+                    'rgba(9, 31, 242, 0.8)',
+                    'rgba(255, 128, 6, 0.8)'
+                ],
+                borderColor: [
+                    'rgba(255, 99, 71, 1)',
+                    'rgba(9, 31, 242, 0.8)',
+                    'rgba(255, 128, 6, 0.8)'
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: { stepSize: 1 }
+                }
+            }
+        }
+    });
+    document.getElementById('downloadPdf').addEventListener('click', function (){
+        const {jsPDF}=window.jspdf;
+        const pdf=new jsPDF();
+        const canvas = document.getElementById('myChart');
+        const imgData= canvas.toDataURL ('image/png');
+        pdf.addImage (imgData, 'PNG',10,10,180,100);
+        pdf.save('chart.pdf');
+    });
+</script>
